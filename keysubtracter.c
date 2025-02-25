@@ -427,7 +427,7 @@ void showhelp()	{
 	printf("-r A:B\t\trange A to B\n");
 	printf("-R\t\tSet the publickey substraction Random instead of secuential\n");
 	printf("-x\t\tExclude comment\n\n");
-	printf("Developed by albertobsd\n\n");
+	printf("Developed by albertobsd | Fast SHA256 Win64 version by @XopMC\n\n");
 }
 
 void set_bit(char *param)	{
