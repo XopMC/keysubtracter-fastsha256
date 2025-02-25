@@ -1,6 +1,7 @@
 # keysubtracter for Win64
 ## Fast sha256 implementation, using SHA-NI CPU instruction
 ## Visual Studio project included
+## ToDo: -o file.txt doesn't work correctly with big -n better to use keysubtracter-fastsha256.exe ...  >> file.txt 
 Bitcoin and Altcoins Publickey subtracter
 
 Generate multiple but different "copies" of a publickey, Actually Added and substracted publickeys.
