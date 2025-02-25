@@ -14,7 +14,7 @@ email: alberto.bsd@gmail.com
 #include <math.h>
 #include <time.h>
 #include "util.h"
-
+#include <omp.h>
 #include "gmpecc.h"
 #include "base58/libbase58.h"
 #include "rmd160/rmd160.h"
@@ -415,6 +415,15 @@ int main(int argc, char **argv)  {
 	}
 	return 0;
 }
+
+
+
+
+
+
+
+
+
 
 void showhelp()	{
 	printf("\nUsage:\n-h\t\tshow this help\n");
