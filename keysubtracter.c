@@ -3,14 +3,14 @@ Developed by Luis Alberto
 email: alberto.bsd@gmail.com
 */
 
-
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <gmp.h>
 #include <string.h>
-#include <unistd.h>
+//#include <unistd.h>
 #include <math.h>
 #include <time.h>
 #include "util.h"
@@ -18,7 +18,7 @@ email: alberto.bsd@gmail.com
 #include "gmpecc.h"
 #include "base58/libbase58.h"
 #include "rmd160/rmd160.h"
-#include "sha256/sha256.h"
+#include "sha256/fast_sha256.h"
 
 
 const char *version = "0.1.20210918";
@@ -79,51 +79,99 @@ int main(int argc, char **argv)  {
 	mpz_init_set_ui(TWO,2);
 	mpz_init(target_publickey.x);
 	mpz_init_set_ui(target_publickey.y,0);
-	while ((c = getopt(argc, argv, "hvxRb:n:o:p:r:f:l:")) != -1) {
-		switch(c) {
+	for (int j = 1; j < argc; j++) {
+		char* arg = argv[j];
+		if (arg[0] == '-') {
+			switch (arg[1]) {
 			case 'x':
 				FLAG_HIDECOMMENT = 1;
-			break;
+				break;
 			case 'h':
 				showhelp();
 				exit(0);
-			break;
-			case 'b':
-				set_bit((char *)optarg);
+				break;
+			case 'b': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -b requires an argument\n");
+					exit(1);
+				}
+				set_bit(optarg);
 				FLAG_BIT = 1;
-			break;
-			case 'n':
-				N = strtol((char *)optarg,NULL,10);
-				if(N<= 0)	{
-					fprintf(stderr,"[E] invalid bit N number %s\n",optarg);
+				break;
+			}
+			case 'n': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -n requires an argument\n");
+					exit(1);
+				}
+				N = strtol(optarg, NULL, 10);
+				if (N <= 0) {
+					fprintf(stderr, "[E] invalid bit N number %s\n", optarg);
 					exit(0);
 				}
 				FLAG_N = 1;
-			break;
-			case 'o':
-				str_output = (char *)optarg;
-			break;
-			case 'p':
-				set_publickey((char *)optarg);
+				break;
+			}
+			case 'o': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -o requires an argument\n");
+					exit(1);
+				}
+				str_output = optarg;
+				break;
+			}
+			case 'p': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -p requires an argument\n");
+					exit(1);
+				}
+				set_publickey(optarg);
 				FLAG_PUBLIC = 1;
-			break;
-			case 'r':
-				set_range((char *)optarg);
+				break;
+			}
+			case 'r': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -r requires an argument\n");
+					exit(1);
+				}
+				set_range(optarg);
 				FLAG_RANGE = 1;
-			break;
+				break;
+			}
 			case 'R':
 				FLAG_RANDOM = 1;
-			break;
+				break;
 			case 'v':
-				printf("version %s\n",version);
+				printf("version %s\n", version);
 				exit(0);
-			break;
-			case 'l':
-				set_look((char *)optarg);
-			break;
-			case 'f':
-				set_format((char *)optarg);
-			break;
+				break;
+			case 'l': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -l requires an argument\n");
+					exit(1);
+				}
+				set_look(optarg);
+				break;
+			}
+			case 'f': {
+				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
+				if (!optarg) {
+					fprintf(stderr, "[E] -f requires an argument\n");
+					exit(1);
+				}
+				set_format(optarg);
+				break;
+			}
+			default:
+				fprintf(stderr, "[E] unknown option: %s\n", arg);
+				break;
+			}
 		}
 	}
 	if((FLAG_BIT || FLAG_RANGE) && FLAG_PUBLIC && FLAG_N)	{
@@ -510,7 +558,7 @@ void set_look(char *param)	{
 
 
 void generate_strpublickey(struct Point *publickey,bool compress,char *dst)	{
-	memset(dst,0,132);
+	memset(dst,0,131);
 	if(compress)	{
 		if(mpz_tstbit(publickey->y, 0) == 0)	{	// Even
 			gmp_snprintf (dst,67,"02%0.64Zx",publickey->x);
@@ -529,7 +577,7 @@ void generate_strrmd160(struct Point *publickey,bool compress,char *dst)	{
 	char bin_publickey[65];
 	char bin_sha256[32];
 	char bin_rmd160[20];
-	memset(dst,0,42);
+	memset(dst,0,41);
 	if(compress)	{
 		if(mpz_tstbit(publickey->y, 0) == 0)	{	// Even
 			gmp_snprintf (str_publickey,67,"02%0.64Zx",publickey->x);
@@ -538,12 +586,12 @@ void generate_strrmd160(struct Point *publickey,bool compress,char *dst)	{
 			gmp_snprintf(str_publickey,67,"03%0.64Zx",publickey->x);
 		}
 		hexs2bin(str_publickey,bin_publickey);
-		sha256(bin_publickey, 33, bin_sha256);
+		sha256_x64(bin_publickey, 33, bin_sha256);
 	}
 	else	{
 		gmp_snprintf(str_publickey,131,"04%0.64Zx%0.64Zx",publickey->x,publickey->y);
 		hexs2bin(str_publickey,bin_publickey);
-		sha256(bin_publickey, 65, bin_sha256);
+		sha256_x64(bin_publickey, 65, bin_sha256);
 	}
 	RMD160Data((const unsigned char*)bin_sha256,32, bin_rmd160);
 	tohex_dst(bin_rmd160,20,dst);
@@ -555,7 +603,7 @@ void generate_straddress(struct Point *publickey,bool compress,char *dst)	{
 	char bin_sha256[32];
 	char bin_digest[60];
 	size_t pubaddress_size = 42;
-	memset(dst,0,42);
+	memset(dst,0,41);
 	if(compress)	{
 		if(mpz_tstbit(publickey->y, 0) == 0)	{	// Even
 			gmp_snprintf (str_publickey,67,"02%0.64Zx",publickey->x);
@@ -564,12 +612,12 @@ void generate_straddress(struct Point *publickey,bool compress,char *dst)	{
 			gmp_snprintf(str_publickey,67,"03%0.64Zx",publickey->x);
 		}
 		hexs2bin(str_publickey,bin_publickey);
-		sha256(bin_publickey, 33, bin_sha256);
+		sha256_x64(bin_publickey, 33, bin_sha256);
 	}
 	else	{
 		gmp_snprintf(str_publickey,131,"04%0.64Zx%0.64Zx",publickey->x,publickey->y);
 		hexs2bin(str_publickey,bin_publickey);
-		sha256(bin_publickey, 65, bin_sha256);
+		sha256_x64(bin_publickey, 65, bin_sha256);
 	}
 	RMD160Data((const unsigned char*)bin_sha256,32, bin_digest+1);
 	
@@ -577,9 +625,9 @@ void generate_straddress(struct Point *publickey,bool compress,char *dst)	{
 	
 	bin_digest[0] = 0;
 	
-	/* Double sha256 checksum */	
-	sha256(bin_digest, 21, bin_digest+21);
-	sha256(bin_digest+21, 32, bin_digest+21);
+	/* Double sha256_x64 checksum */	
+	sha256_x64(bin_digest, 21, bin_digest+21);
+	sha256_x64(bin_digest+21, 32, bin_digest+21);
 	
 	/* Get the address */
 	if(!b58enc(dst,&pubaddress_size,bin_digest,25)){

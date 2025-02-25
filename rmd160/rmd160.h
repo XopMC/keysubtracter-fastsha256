@@ -28,15 +28,15 @@ typedef struct RMD160Context {
 
 #define RIPEMD160Context RMD160Context
 
-#include <sys/cdefs.h>
+//#include <sys/cdefs.h>
 
-__BEGIN_DECLS
+//__BEGIN_DECLS
 void   RMD160Init(RMD160_CTX *);
 void   RMD160Update(RMD160_CTX *, const unsigned char *, unsigned int);
 void   RMD160Final(unsigned char [RMD160_HASHBYTES], RMD160_CTX *);
 char * RMD160End(RMD160_CTX *, char *);
 char * RMD160File(const char *, char *);
 void RMD160Data(const unsigned char *, unsigned int, char *);
-__END_DECLS
+//__END_DECLS
 
 #endif /* _RMD160_H_ */
