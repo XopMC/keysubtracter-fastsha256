@@ -115,10 +115,12 @@ void Scalar_Multiplication(struct Point P, struct Point *R, mpz_t m)	{
 	mpz_clear(SM_Q.y);
 }
 
-void Point_Negation(struct Point *A, struct Point *S)	{
-	mpz_sub(S->y, EC.p, A->y);
+void Point_Negation(struct Point* A, struct Point* S) {
 	mpz_set(S->x, A->x);
+	mpz_sub(S->y, EC.p, A->y);
+	mpz_mod(S->y, S->y, EC.p); // Приведение по модулю EC.p
 }
+
 
 /*
 	Precalculate G Doublings for Scalar_Multiplication
