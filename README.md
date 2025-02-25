@@ -1,4 +1,4 @@
-# keysubtracter
+# keysubtracter for Win64
 ## Fast sha256 implementation, using SHA-NI CPU instruction
 ## Visual Studio project included
 Bitcoin and Altcoins Publickey subtracter
