@@ -106,14 +106,15 @@ int main(int argc, char **argv)  {
 					fprintf(stderr, "[E] -n requires an argument\n");
 					exit(1);
 				}
-				N = strtol(optarg, NULL, 10);
-				if (N <= 0) {
+				N = strtoull(optarg, NULL, 10);
+				if (N == 0) {
 					fprintf(stderr, "[E] invalid bit N number %s\n", optarg);
 					exit(0);
 				}
 				FLAG_N = 1;
 				break;
 			}
+
 			case 'o': {
 				char* optarg = (arg[2] != '\0') ? &arg[2] : ((j + 1 < argc) ? argv[++j] : NULL);
 				if (!optarg) {
